@@ -30,7 +30,7 @@ async function run() {
       const user = req.body;
       const result = await userCollection.insertOne(user);
       console.log(result);
-      res.send(result);
+      res.json(result);
     });
     app.put('/user', async (req, res) => {
       const user = req.body;
@@ -40,7 +40,7 @@ async function run() {
         $set: { user },
       };
       const result = await userCollection.updateOne(filter, updateDoc, options);
-      res.send(result);
+      res.json(result);
     });
 
     // Get Amin Api
@@ -79,53 +79,53 @@ async function run() {
         updateDoc,
         options
       );
-      res.send(result);
+      res.json(result);
     });
     // Get Review Api
     app.get('/review', async (req, res) => {
       const cursor = reviewCollection.find({});
       const result = await cursor.toArray();
-      res.send(result);
+      res.json(result);
     });
 
     // Post Order API
     app.post('/order', async (req, res) => {
       const data = req.body;
       const result = await orderCollection.insertOne(data);
-      res.send(result);
+      res.json(result);
     });
     // Get Order Api
     app.get('/order', async (req, res) => {
       const cursor = orderCollection.find({});
       const result = await cursor.toArray();
-      res.send(result);
+      res.json(result);
     });
     // Delete Order API
     app.delete('/order/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: id };
       const result = await orderCollection.deleteOne(query);
-      res.send(result);
+      res.json(result);
     });
 
     // Product Post API
     app.post('/products', async (req, res) => {
       const data = req.body;
       const result = await productCollection.insertOne(data);
-      res.send(result);
+      res.json(result);
     });
     // GET API all data
     app.get('/products', async (req, res) => {
       const cursor = productCollection.find({});
       const result = await cursor.toArray();
-      res.send(result);
+      res.json(result);
     });
     // GET API all data
     app.get('/products/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await productCollection.findOne(query);
-      res.send(result);
+      res.json(result);
     });
   } finally {
     // await client.close();wgF5YpZGdYr5xAN1
@@ -133,9 +133,6 @@ async function run() {
 }
 run().catch(console.dir);
 
-app.get('/', (req, res) => {
-  req.send('connected');
-});
 app.listen(port, () => {
   console.log('Server is runing on PORT : ', port);
 });
