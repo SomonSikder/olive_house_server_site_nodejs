@@ -1,8 +1,9 @@
-const express = require('express');
-const { MongoClient } = require('mongodb');
-const cors = require('cors');
-const ObjectId = require('mongodb').ObjectId;
-require('dotenv').config();
+const express = require("express");
+const { MongoClient } = require("mongodb");
+const cors = require("cors");
+const ObjectId = require("mongodb").ObjectId;
+const { query } = require("express");
+require("dotenv").config();
 
 const app = express();
 app.use(express.json());
@@ -19,20 +20,20 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
-    const oliva = client.db('oliva');
-    const productCollection = oliva.collection('products');
-    const orderCollection = oliva.collection('orders');
-    const reviewCollection = oliva.collection('reviews');
-    const userCollection = oliva.collection('users');
+    const oliva = client.db("oliva");
+    const productCollection = oliva.collection("products");
+    const orderCollection = oliva.collection("orders");
+    const reviewCollection = oliva.collection("reviews");
+    const userCollection = oliva.collection("users");
 
     // Post User Api
-    app.post('/user', async (req, res) => {
+    app.post("/user", async (req, res) => {
       const user = req.body;
       const result = await userCollection.insertOne(user);
-      console.log(result);
+      console.log(user);
       res.json(result);
     });
-    app.put('/user', async (req, res) => {
+    app.put("/user", async (req, res) => {
       const user = req.body;
       const filter = { email: user.email };
       const options = { upsert: true };
@@ -43,31 +44,32 @@ async function run() {
       res.json(result);
     });
 
-    // Get Amin Api
-    app.get('/user/:email', async (req, res) => {
+    // Get Admin Api
+    app.get("/user/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
       const user = await userCollection.findOne(query);
       let isAdmin = false;
-      if (user?.role === 'admin') {
+      if (user?.role === "admin") {
         isAdmin = true;
       }
+      // console.log(user);
       res.json({ admin: isAdmin });
     });
 
     // Admin Api
-    app.put('/user/admin', async (req, res) => {
+    app.put("/user/admin", async (req, res) => {
       const user = req.body;
       const filter = { email: user.email };
       const updateDoc = {
-        $set: { role: 'admin' },
+        $set: { role: "admin" },
       };
       const result = await userCollection.updateOne(filter, updateDoc);
-      console.log(result);
       res.json(result);
     });
+
     // Post Review API
-    app.post('/review', async (req, res) => {
+    app.post("/review", async (req, res) => {
       const data = req.body;
       const filter = { email: data.email };
       const options = { upsert: true };
@@ -82,46 +84,46 @@ async function run() {
       res.json(result);
     });
     // Get Review Api
-    app.get('/review', async (req, res) => {
+    app.get("/review", async (req, res) => {
       const cursor = reviewCollection.find({});
       const result = await cursor.toArray();
       res.json(result);
     });
 
     // Post Order API
-    app.post('/order', async (req, res) => {
+    app.post("/order", async (req, res) => {
       const data = req.body;
       const result = await orderCollection.insertOne(data);
       res.json(result);
     });
     // Get Order Api
-    app.get('/order', async (req, res) => {
+    app.get("/order", async (req, res) => {
       const cursor = orderCollection.find({});
       const result = await cursor.toArray();
       res.json(result);
     });
     // Delete Order API
-    app.delete('/order/:id', async (req, res) => {
+    app.delete("/order/:id", async (req, res) => {
       const id = req.params.id;
-      const query = { _id: id };
-      const result = await orderCollection.deleteOne(query);
+      const item = { _id: ObjectId(id) };
+      const result = await orderCollection.deleteOne(item);
       res.json(result);
     });
 
     // Product Post API
-    app.post('/products', async (req, res) => {
+    app.post("/products", async (req, res) => {
       const data = req.body;
       const result = await productCollection.insertOne(data);
       res.json(result);
     });
     // GET API all data
-    app.get('/products', async (req, res) => {
+    app.get("/products", async (req, res) => {
       const cursor = productCollection.find({});
       const result = await cursor.toArray();
       res.json(result);
     });
     // GET API all data
-    app.get('/products/:id', async (req, res) => {
+    app.get("/products/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await productCollection.findOne(query);
@@ -132,7 +134,9 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
+app.get("/", async (req, res) => {
+  res.send("Hello");
+});
 app.listen(port, () => {
-  console.log('Server is runing on PORT : ', port);
+  console.log("Server is runing on PORT : ", port);
 });
